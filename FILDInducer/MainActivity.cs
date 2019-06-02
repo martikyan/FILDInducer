@@ -72,28 +72,37 @@ namespace FILDInducer
 
         private void Stop()
         {
-            _progressBarUpdaterCancellation.Cancel();
-            _mainButton.Text = "Start";
+            RunOnUiThread(() =>
+            {
+                _mainButton.Text = "Start";
+            });
+
             _timeoutManager.Stop();
-            _progressBar.Visibility = ViewStates.Invisible;
+            _progressBarUpdaterCancellation.Cancel();
         }
 
         private void Start()
         {
+            RunOnUiThread(() =>
+            {
+                _mainButton.Text = "Stop";
+                _progressBar.Visibility = ViewStates.Visible;
+            });
+
             _progressBarUpdaterCancellation = new CancellationSignal();
-            _mainButton.Text = "Stop";
             _timeoutManager.Start();
-            _progressBar.Visibility = ViewStates.Visible;
 
             _progressBarUpdater = ProgressBarUpdater(_progressBarUpdaterCancellation);
-            _progressBarUpdater.ConfigureAwait(true);
         }
 
         private void Layout_Touch(object sender, View.TouchEventArgs e)
         {
             // Restart the timeout manager.
-            _timeoutManager.Stop();
-            _timeoutManager.Start();
+            if (_timeoutManager.Running)
+            {
+                _timeoutManager.Stop();
+                _timeoutManager.Start();
+            }
         }
 
         private void OnTimeoutReached(object sender, EventArgs e)
@@ -106,7 +115,10 @@ namespace FILDInducer
         {
             while (_timeoutManager.Running || !cancellationSignal.IsCanceled)
             {
-                _progressBar.Progress = (int)_timeoutManager.ProgressPercentage;
+                RunOnUiThread(() =>
+                {
+                    _progressBar.Progress = (int)_timeoutManager.ProgressPercentage;
+                });
                 await Task.Delay(10);
             }
         }
