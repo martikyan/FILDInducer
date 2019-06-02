@@ -1,26 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Timers;
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 
 namespace FILDInducer
 {
     internal sealed class TimeoutManager
     {
         public TimeSpan Timeout { get; }
-        public bool Running { get; private set; } = true;
-        public float ProgressPercentage => (float) (100.0 * _stopwatch.ElapsedMilliseconds / Timeout.TotalMilliseconds);
+        public bool Running { get; private set; } = false;
+        public float ProgressPercentage => (float)(100.0 * _stopwatch.ElapsedMilliseconds / Timeout.TotalMilliseconds);
+
         public event EventHandler TimeoutReached;
 
-        private readonly Timer _timer;
+        private readonly Timer _timer = new Timer();
         private readonly Stopwatch _stopwatch = new Stopwatch();
 
         public TimeoutManager(TimeSpan timeout)
@@ -31,26 +23,29 @@ namespace FILDInducer
             }
 
             Timeout = timeout;
-            _timer = new Timer(Timeout.TotalMilliseconds)
-            {
-                AutoReset = false,
-            };
-            _stopwatch.Start();
+            _timer.AutoReset = false;
             _timer.Elapsed += TimeoutReachedHandler;
         }
 
-        public void Restart()
+        public void Start()
+        {
+            _timer.Interval = Timeout.TotalMilliseconds;
+            _timer.Start();
+
+            _stopwatch.Start();
+            Running = true;
+        }
+
+        public void Stop()
         {
             _timer.Stop();
-            _timer.Start();
-            _stopwatch.Restart();
+            _stopwatch.Reset();
+            Running = false;
         }
 
         private void TimeoutReachedHandler(object sender, ElapsedEventArgs e)
         {
-            Running = false;
-            _stopwatch.Stop();
-            _timer.Stop();
+            Stop();
             TimeoutReached?.Invoke(sender, e);
         }
     }

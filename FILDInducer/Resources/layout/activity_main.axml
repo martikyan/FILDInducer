@@ -22,4 +22,12 @@
 
     <include layout="@layout/content_main" />
 
+	<Button
+        android:id="@+id/mainButton"
+		android:text="Start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_margin="@dimen/fab_margin" />
+
 </android.support.design.widget.CoordinatorLayout>

@@ -10,9 +10,10 @@
 
 	<ProgressBar
         android:id="@+id/progressBar"
+        android:layout_height="wrap_content"
         android:layout_width="fill_parent"
 		android:max="100"
-        android:layout_height="wrap_content"
+		android:visibility="invisible"
         style="?android:attr/progressBarStyleHorizontal" />
-
+	
 </RelativeLayout>
